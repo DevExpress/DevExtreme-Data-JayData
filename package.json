@@ -1,0 +1,18 @@
+{
+  "name": "devextreme-data-jaydata",
+  "version": "15.1.6",
+  "devDependencies": {
+    "bower": "^1.4.1",
+    "bower-installer": "^1.2.0",
+
+    "gulp": "^3.9.0",
+    "gulp-serve": "1.0.0",
+    "gulp-qunit": "^1.2.1",
+
+    "karma": "^0.13.9",
+    "karma-qunit": "^0.1.5",
+    "karma-phantomjs-launcher": "^0.2.1",
+    "karma-junit-reporter": "^0.3.3",
+    "karma-coverage": "^0.5.0"
+  }
+}

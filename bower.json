@@ -1,0 +1,31 @@
+{
+    "name": "devextreme-data-jaydata",
+    "version": "15.1.6",
+    "dependencies": {
+        "datajs": "latest",
+        "jquery": "latest",
+        "globalize": "latest",
+        "devextreme": "latest",
+        "crds-jaydata": "latest"
+    },
+    "devDependencies": {
+        "qunit": "latest"
+    },
+    "install": {
+        "path": "lib",
+
+        "sources": {
+            "datajs": [
+                "bower_components/datajs/datajs*.min.js"
+            ],
+            "globalize": [
+                "bower_components/globalize/lib/globalize.js"
+            ],
+            "crds-jaydata": [
+                "bower_components/crds-jaydata/release/jaydata.min.js",
+                "bower_components/crds-jaydata/release/jaydatamodules/deferred.min.js",
+                "bower_components/crds-jaydata/release/jaydataproviders/oDataProvider.min.js"
+            ]
+        }
+    }
+}
