@@ -1,5 +1,8 @@
 language: node_js
 
+env:
+- XUNIT_FILE=shippable/testresults/test-results.xml
+
 before_install:
 - npm install -g gulp
 - npm install -g bower

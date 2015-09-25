@@ -43,11 +43,17 @@
 
             queryable.toArray()
                 .then(function (data) {
-                    if (queryOptions.requireTotalCount && utilsNs.isNumber(data.totalCount)) {
-                        d.resolve([].concat(data), { totalCount: data.totalCount });
-                    } else {
-                        d.resolve(data);
+                    var extra = {};
+
+                    if (queryOptions.requireTotalCount) {
+                        // TODO: We asked it and don't get it.
+                        // Should we throw an exception?
+                        extra.totalCount = utilsNs.isNumber(data.totalCount)
+                            ? data.totalCount
+                            : -1;
                     }
+
+                    d.resolve(data, extra);
                 })
                 .fail(d.reject);
 
