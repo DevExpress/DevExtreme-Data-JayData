@@ -6,25 +6,25 @@
         "jquery": "latest",
         "globalize": "latest",
         "devextreme": "latest",
-        "crds-jaydata": "latest"
+        "jaydata-itself": "https://raw.githubusercontent.com/jaydata/jaydata/development/release/jaydata.js",
+        "jaydata-odata-provider": "https://raw.githubusercontent.com/jaydata/jaydata/development/release/jaydataproviders/oDataProvider.js"
     },
     "devDependencies": {
-        "qunit": "latest"
+        "qunit": "latest",
+        "sinon": "http://sinonjs.org/releases/sinon-1.16.1.js"
     },
     "install": {
         "path": "lib",
 
         "sources": {
+            "sinon": [
+                "bower_components/sinon/index.js"
+            ],
             "datajs": [
                 "bower_components/datajs/datajs*.min.js"
             ],
             "globalize": [
                 "bower_components/globalize/lib/globalize.js"
-            ],
-            "crds-jaydata": [
-                "bower_components/crds-jaydata/release/jaydata.min.js",
-                "bower_components/crds-jaydata/release/jaydatamodules/deferred.min.js",
-                "bower_components/crds-jaydata/release/jaydataproviders/oDataProvider.min.js"
             ]
         }
     }

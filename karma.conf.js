@@ -12,10 +12,11 @@ module.exports = function (config) {
             "lib/devextreme/dx.all.js",
 
             "lib/datajs/datajs-*.min.js",
-            
-            "lib/crds-jaydata/jaydata.min.js",
-            "lib/crds-jaydata/oDataProvider.min.js",
 
+            "lib/jaydata-itself/index.js",
+            "lib/jaydata-odata-provider/index.js",
+            "lib/sinon/index.js",
+            
             "src/dx.data.jayData.js",
 
             "tests/queryJayDataTests.js"
