@@ -567,4 +567,52 @@
             .always(done);
     });
 
+    QUnit.test("error handling for count", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith([
+            HTTP_STATUSES.OK,
+            HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+            JSON.stringify({
+                error: {
+                    "message": "Unknown error"
+                }
+            })
+        ]);
+
+        createJayDataQuery()
+            .count()
+            .fail(function (error) {
+                assert.ok(error instanceof Error);
+            })
+            .done(function () {
+                assert.ok(false, NO_PASARAN_MESSAGE);
+            })
+            .always(done);
+    });
+
+    QUnit.test("error handling for enumerate", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith([
+            HTTP_STATUSES.OK,
+            HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+            JSON.stringify({
+                error: {
+                    "message": "Unknown error"
+                }
+            })
+        ]);
+
+        createJayDataQuery()
+            .enumerate()
+            .fail(function (error) {
+                assert.ok(error instanceof Error);
+            })
+            .done(function () {
+                assert.ok(false, NO_PASARAN_MESSAGE);
+            })
+            .always(done);
+    });
+
 })(QUnit, jQuery, DevExpress);
