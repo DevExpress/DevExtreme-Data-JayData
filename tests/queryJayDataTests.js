@@ -31,7 +31,9 @@
             type: String
         },
         referenceToAnotherEntity: {
-            type: "AnotherEntity"
+            type: "AnotherEntity",
+            inverseProperty: "referenceToEntity",
+            required: true
         }
     });
 
@@ -43,11 +45,16 @@
         name: {
             key: false,
             type: String
+        },
+        referenceToEntity: {
+            type: "Entity",
+            inverseProperty: "referenceToAnotherEntity"
         }
     });
 
     $data.EntityContext.extend("Context", {
-        Entities: { type: $data.EntitySet, elementType: "Entity" }
+        Entities: { type: $data.EntitySet, elementType: "Entity" },
+        AnotherEntities: { type: $data.EntitySet, elementType: "AnotherEntity"}
     });
 
     var ctx = new Context({
@@ -195,6 +202,72 @@
         assert.throws(function () {
             createJayDataQuery().groupBy();
         });
+    });
+
+    QUnit.test("select", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith(function (request) {
+            assert.equal(
+                "Service/Entities?$select=name",
+                decodeURIComponent(request.url)
+                );
+
+            request.respond(HTTP_STATUSES.OK, HTTP_WEBAPI_ODATA_RESPONSE_HEADERS, JSON.stringify({
+                d: { results: [] }
+            }));
+        });
+
+        createJayDataQuery()
+            .select("name")
+            .enumerate()
+            .always(done);
+    });
+
+    QUnit.test("expand", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith(function (request) {
+
+            assert.equal(
+                "Service/Entities?$expand=referenceToAnotherEntity",
+                decodeURIComponent(request.url)
+                );
+
+            request.respond(HTTP_STATUSES.OK, HTTP_WEBAPI_ODATA_RESPONSE_HEADERS, JSON.stringify({
+                d: { results: [] }
+            }));
+        });
+
+        createJayDataQuery()
+            .expand("referenceToAnotherEntity")
+            .enumerate()
+            .always(done);
+    });
+
+    QUnit.test("select and implicit expand", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith(function (request) {
+
+            assert.equal(
+                "Service/Entities?$expand=referenceToAnotherEntity,referenceToAnotherEntity&$select=name,referenceToAnotherEntity/id,referenceToAnotherEntity/name",
+                decodeURIComponent(request.url)
+                );
+
+            request.respond(HTTP_STATUSES.OK, HTTP_WEBAPI_ODATA_RESPONSE_HEADERS, JSON.stringify({
+                d: { results: [] }
+            }));
+        });
+
+        createJayDataQuery()
+            .select(
+                "name",
+                "referenceToAnotherEntity.id",
+                "referenceToAnotherEntity.name"
+                )
+            .enumerate()
+            .always(done);
     });
 
 })(QUnit, jQuery, DevExpress);
