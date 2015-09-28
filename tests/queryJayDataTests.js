@@ -270,4 +270,60 @@
             .always(done);
     });
 
+    QUnit.test("slice", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith(function (request) {
+
+            assert.equal(
+                "Service/Entities?$top=2&$skip=1",
+                decodeURIComponent(request.url)
+                );
+
+            request.respond(HTTP_STATUSES.OK, HTTP_WEBAPI_ODATA_RESPONSE_HEADERS, JSON.stringify({
+                d: { results: [] }
+            }));
+        });
+
+        createJayDataQuery()
+            .slice(1, 2)
+            .enumerate()
+            .always(done);
+    });
+
+    // NOTE: JayData requires the take and skip expressions to be the last in chain
+    QUnit.test("slice:order", function (assert) {
+        var all,
+            done = assert.async();
+
+        this.server.respondWith(function (request) {
+            request.respond(HTTP_STATUSES.OK, HTTP_WEBAPI_ODATA_RESPONSE_HEADERS, JSON.stringify({
+                d: { results: [] }
+            }));
+        });
+
+        all = [
+            createJayDataQuery()
+                .slice(1, 2)
+                .sortBy("name", true)
+                .enumerate(),
+            createJayDataQuery()
+                .sortBy("name", true)
+                .slice(1, 2)
+                .filter("id", ">", 1)
+                .enumerate(),
+            createJayDataQuery({ requireTotalCount: true })
+                .slice(1, 2)
+                .enumerate()
+        ];
+        $.when.apply($, all)
+            .fail(function () {
+                assert.ok(false, NO_PASARAN_MESSAGE);
+            })
+            .done(function () {
+                assert.ok(true);
+            })
+            .always(done);
+    });
+
 })(QUnit, jQuery, DevExpress);
