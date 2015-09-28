@@ -326,4 +326,211 @@
             .always(done);
     });
 
+    QUnit.test("filter:simple", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith(function (request) {
+
+            assert.equal(
+                "Service/Entities?$filter=(id ne 1)",
+                decodeURIComponent(request.url)
+                );
+
+            request.respond(HTTP_STATUSES.OK, HTTP_WEBAPI_ODATA_RESPONSE_HEADERS, JSON.stringify({
+                d: { results: [] }
+            }));
+        });
+
+        createJayDataQuery()
+            .filter("id", "<>", 1)
+            .enumerate()
+            .always(done);
+    });
+
+    QUnit.test("filter:complex #1", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith(function (request) {
+
+            assert.equal(
+                "Service/Entities?$filter=(((id ne 1) or ((id eq 2) and (name eq 'bar'))) and (name eq 'foo'))",
+                decodeURIComponent(request.url)
+                );
+
+            request.respond(HTTP_STATUSES.OK, HTTP_WEBAPI_ODATA_RESPONSE_HEADERS, JSON.stringify({
+                d: { results: [] }
+            }));
+        });
+
+        createJayDataQuery()
+            .filter([
+                [
+                    ["id", "<>", 1],
+                    "or",
+                    [
+                        ["id", 2],
+                        ["name", "bar"]
+                    ]
+                ],
+                "and",
+                ["name", "foo"]
+            ])
+            .enumerate()
+            .always(done);
+    });
+
+    QUnit.test("filter:complex #2", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith(function (request) {
+
+            assert.equal(
+                "Service/Entities?$filter=((id eq 1) and (substringof('a',name) or substringof('b',description)))",
+                decodeURIComponent(request.url)
+                );
+
+            request.respond(HTTP_STATUSES.OK, HTTP_WEBAPI_ODATA_RESPONSE_HEADERS, JSON.stringify({
+                d: { results: [] }
+            }));
+        });
+
+        createJayDataQuery()
+            .filter(
+                ["id", "=", 1],
+                "and",
+                [
+                    ["name", "contains", "a"],
+                    "or",
+                    ["description", "contains", "b"]
+                ])
+            .enumerate()
+            .always(done);
+    });
+
+    QUnit.test("filter:complex #3", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith(function (request) {
+
+            assert.equal(
+                "Service/Entities?$filter=(((id eq 1) or (id eq 2)) or (id eq 3))",
+                decodeURIComponent(request.url)
+                );
+
+            request.respond(HTTP_STATUSES.OK, HTTP_WEBAPI_ODATA_RESPONSE_HEADERS, JSON.stringify({
+                d: { results: [] }
+            }));
+        });
+
+        createJayDataQuery()
+            .filter([
+                ["id", 1],
+                "or",
+                ["id", 2],
+                "or",
+                ["id", 3]
+            ])
+            .enumerate()
+            .always(done);
+    });
+
+    QUnit.test("filter:all operations", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith(function (request) {
+
+            assert.equal(
+                "Service/Entities?$filter=((((((((((name eq 'bar') and (name gt 'bar')) and (name lt 'bar')) and (name ne 'bar')) and (name ge 'bar')) and (name le 'bar')) and endswith(name,'bar')) and startswith(name,'bar')) and substringof('bar',name)) and not(substringof('bar',name)))",
+                decodeURIComponent(request.url)
+                );
+
+            request.respond(
+                HTTP_STATUSES.OK,
+                HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+                JSON.stringify({
+                    d: { results: [] }
+                }));
+        });
+
+        createJayDataQuery()
+            .filter([
+                ["name", "=", "bar"],
+                ["name", ">", "bar"],
+                ["name", "<", "bar"],
+                ["name", "<>", "bar"],
+                ["name", ">=", "bar"],
+                ["name", "<=", "bar"],
+                ["name", "endswith", "bar"],
+                ["name", "startswith", "bar"],
+                ["name", "contains", "bar"],
+                ["name", "notcontains", "bar"]
+            ])
+            .enumerate()
+            .always(done);
+    });
+
+    QUnit.test("filter:mixin and/or operators are not allowed", function (assert) {
+        assert.throws(function () {
+            createJayDataQuery()
+                .filter([
+                    ["id", 1],
+                    "and",
+                    ["id", "<", 1],
+                    "or",
+                    ["id", ">", 1]
+                ])
+                .enumerate();
+        });
+
+        assert.throws(function () {
+            createJayDataQuery()
+                .filter([
+                    ["id", 1],
+                    ["id", "<", 1],
+                    "or",
+                    ["id", ">", 1]
+                ])
+                .enumerate();
+        });
+
+        assert.throws(function () {
+            createJayDataQuery()
+                .filter([
+                    ["id", 1],
+                    "or",
+                    ["id", "<", 1],
+                    ["id", ">", 1]
+                ])
+                .enumerate();
+        });
+    });
+
+    QUnit.test("filter:user can pass his own Queryable", function (assert) {
+        var done = assert.async();
+        var queryable = ctx.Entities
+            .order("id")
+            .filter("it.id == 1");
+
+        this.server.respondWith(function (request) {
+
+            assert.equal(
+                "Service/Entities?$orderby=id&$filter=((id eq 1) and (id eq 2))&$top=2&$skip=1",
+                decodeURIComponent(request.url)
+                );
+
+            request.respond(
+                HTTP_STATUSES.OK,
+                HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+                JSON.stringify({
+                    d: { results: [] }
+                }));
+        });
+
+        dataNs.queryImpl.jayData(queryable)
+            .filter(["id", 2])
+            .slice(1, 2)
+            .enumerate()
+            .always(done);
+    });
+
 })(QUnit, jQuery, DevExpress);
