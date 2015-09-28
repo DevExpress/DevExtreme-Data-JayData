@@ -25,6 +25,24 @@
         name: {
             key: false,
             type: String
+        },
+        description: {
+            key: false,
+            type: String
+        },
+        referenceToAnotherEntity: {
+            type: "AnotherEntity"
+        }
+    });
+
+    $data.Entity.extend("AnotherEntity", {
+        id: {
+            key: true,
+            type: Number
+        },
+        name: {
+            key: false,
+            type: String
         }
     });
 
@@ -142,6 +160,35 @@
                 });
             })
             .always(done);
+    });
+
+    QUnit.test("sortBy / thenBy", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith(function (request) {
+            assert.equal(
+                "Service/Entities?$orderby=name desc,description,referenceToAnotherEntity/name",
+                decodeURIComponent(request.url)
+                );
+
+            request.respond(HTTP_STATUSES.OK, HTTP_WEBAPI_ODATA_RESPONSE_HEADERS, JSON.stringify({
+                d: { results: [] }
+            }));
+        });
+
+        createJayDataQuery()
+            .sortBy("name", true)
+            .thenBy("description")
+            .thenBy("referenceToAnotherEntity.name")
+            .enumerate()
+            .always(done);
+
+    });
+
+    QUnit.test("thenBy cannot be called before sortBy", function (assert) {
+        assert.throws(function () {
+            createJayDataQuery().thenBy("name");
+        });
     });
 
 })(QUnit, jQuery, DevExpress);
