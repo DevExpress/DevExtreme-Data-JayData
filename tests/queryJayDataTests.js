@@ -395,14 +395,15 @@
         });
 
         createJayDataQuery()
-            .filter(
+            .filter([
                 ["id", "=", 1],
                 "and",
                 [
                     ["name", "contains", "a"],
                     "or",
                     ["description", "contains", "b"]
-                ])
+                ]
+            ])
             .enumerate()
             .always(done);
     });
@@ -530,6 +531,39 @@
             .filter(["id", 2])
             .slice(1, 2)
             .enumerate()
+            .always(done);
+    });
+
+    QUnit.test("count", function (assert) {
+        var done = assert.async(),
+            expectedCount = 42;
+
+        this.server.respondWith(function (request) {
+
+            assert.equal(
+                decodeURIComponent(request.url),
+                "Service/Entities?$inlinecount=allpages&$top=0"
+                );
+
+            request.respond(
+                HTTP_STATUSES.OK,
+                HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+                JSON.stringify({
+                    d: {
+                        __count: expectedCount
+                    }
+                })
+                );
+        });
+
+        createJayDataQuery()
+            .count()
+            .fail(function () {
+                assert.ok(false, NO_PASARAN_MESSAGE);
+            })
+            .done(function (value) {
+                assert.equal(value, expectedCount);
+            })
             .always(done);
     });
 
