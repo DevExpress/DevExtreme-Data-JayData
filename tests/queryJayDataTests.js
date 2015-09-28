@@ -191,4 +191,10 @@
         });
     });
 
+    QUnit.test("grouping throws", function (assert) {
+        assert.throws(function () {
+            createJayDataQuery().groupBy();
+        });
+    });
+
 })(QUnit, jQuery, DevExpress);
