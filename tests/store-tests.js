@@ -53,9 +53,15 @@
         }
     });
 
+    $data.Entity.extend("EntityWithCompoundKey", {
+        id1: { type: "int", key: true },
+        id2: { type: "int", key: true }
+    });
+
     $data.EntityContext.extend("Context", {
         Entities: { type: $data.EntitySet, elementType: "Entity" },
-        AnotherEntities: { type: $data.EntitySet, elementType: "AnotherEntity"}
+        AnotherEntities: { type: $data.EntitySet, elementType: "AnotherEntity" },
+        EntitiesWithCompoundKey: { type: $data.EntitySet, elementType: "EntityWithCompoundKey" }
     });
 
     var ctx = new Context({
@@ -149,6 +155,48 @@
                 filter: ["name", "foo"],
                 expand: ["referenceToAnotherEntity"],
                 requireTotalCount: true
+            })
+            .always(done);
+    });
+
+    QUnit.test("byKey (simple key)", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith(function (request) {
+            assert.equal(decodeURIComponent(request.url), "Service/Entities?$filter=(id eq 1)");
+
+            request.respond(
+                HTTP_STATUSES.OK,
+                HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+                JSON.stringify({
+                    d: { value: {} }
+                }));
+        });
+
+        createJayDataStore({ key: "id" })
+            .byKey(1)
+            .always(done);
+    });
+
+    QUnit.test("byKey (complex key)", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith(function (request) {
+            assert.equal(decodeURIComponent(request.url), "Service/EntitiesWithCompoundKey?$filter=((id1 eq 1) and (id2 eq 2))");
+
+            request.respond(
+                HTTP_STATUSES.OK,
+                HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+                JSON.stringify({
+                    d: { value: {} }
+                }));
+        });
+
+        createJayDataStore({ queryable: ctx.EntitiesWithCompoundKey, key: ["id1", "id2"] })
+            .byKey({
+                "id1": 1,
+                "id2": 2,
+                "it should be ignored": "it will be ignored"
             })
             .always(done);
     });
