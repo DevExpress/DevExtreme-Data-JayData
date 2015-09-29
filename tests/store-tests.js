@@ -201,4 +201,22 @@
             .always(done);
     });
 
+    QUnit.test("key and keyOf", function (assert) {
+        var store = createJayDataStore();
+
+        assert.equal(store.key(), "id");
+        assert.equal(store.keyOf({ id: "value" }), "value");
+
+        store = createJayDataStore({ queryable:
+            ctx.EntitiesWithCompoundKey
+        });
+
+        assert.deepEqual(store.key(), [
+            "id1",
+            "id2"
+        ]);
+
+        assert.deepEqual(store.keyOf({ id1: "abc", id2: "xyz" }), { id1: "abc", id2: "xyz" });
+    });
+
 })(QUnit, jQuery, DevExpress);
