@@ -19,7 +19,8 @@ module.exports = function (config) {
 
             "src/dx.data.jayData.js",
 
-            "tests/query-tests.js"
+            "tests/query-tests.js",
+            "tests/store-tests.js"
         ],
         plugins: [
             "karma-qunit",
