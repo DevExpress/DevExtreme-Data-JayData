@@ -336,4 +336,59 @@
             .always(done);
     });
 
+    QUnit.test("remove", function (assert) {
+        var done = assert.async();
+
+        var store = createJayDataStore();
+        var entity = store.queryable()
+            .attachOrGet({ id: 1, name: "foo" });
+
+        assert.equal(entity.entityState, $data.EntityState.Unchanged);
+
+        store.remove(1)
+            .fail(function () {
+                assert.ok(false, NO_PASARAN_MESSAGE);
+            })
+            .done(function (key) {
+                assert.equal(key, 1);
+
+                assert.equal(entity.entityState, $data.EntityState.Deleted);
+            })
+            .always(done);
+    });
+
+   QUnit.test("remove (autoCommit=true)", function (assert) {
+       var done = assert.async();
+
+       this.server.respondWith(function (request) {
+           request.respond(
+               HTTP_STATUSES.OK,
+               HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+               JSON.stringify({
+                   d: {
+                       id: 1,
+                       name: "foo"
+                   }
+               }));
+       });
+
+       var store = createJayDataStore({ autoCommit: true });
+       var entity = store.queryable()
+           .attachOrGet({ id: 1, name: "foo" });
+
+       assert.equal(entity.entityState, $data.EntityState.Unchanged);
+
+       store.remove(1)
+           .fail(function () {
+               assert.ok(false, NO_PASARAN_MESSAGE);
+           })
+           .done(function (key) {
+               assert.equal(key, 1);
+
+                var tracked = store.entityContext().stateManager.trackedEntities;
+                assert.equal(tracked.length, 0);
+           })
+           .always(done);
+   });
+
 })(QUnit, jQuery, DevExpress);
