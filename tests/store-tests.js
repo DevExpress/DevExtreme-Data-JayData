@@ -389,6 +389,246 @@
                 assert.equal(tracked.length, 0);
            })
            .always(done);
+    });
+
+   QUnit.test("error handling for load", function (assert) {
+       var done = assert.async();
+
+       this.server.respondWith([
+           HTTP_STATUSES.OK,
+           HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+           JSON.stringify({
+               error: {
+                   code: "500",
+                   message: "Simulated error"
+               }
+           })
+       ]);
+
+       var log = [];
+       var store = createJayDataStore({
+           errorHandler: function (error) {
+               log.push(["optional", error.message]);
+           }
+       });
+
+       dataNs.errorHandler = function (error) {
+           log.push(["global", error.message]);
+       };
+
+       store.load()
+           .done(function () {
+               assert.ok(false, NO_PASARAN_MESSAGE);
+           })
+           .fail(function (error) {
+               log.push(["direct", error.message]);
+           })
+           .always(function () {
+               assert.deepEqual(log, [
+                   ["optional", "Simulated error"],
+                   ["global", "Simulated error"],
+                   ["direct", "Simulated error"]
+               ]);
+           })
+           .always(function () {
+               dataNs.errorHandler = null;
+           })
+           .always(done);
+   });
+
+   QUnit.test("error handling for byKey", function (assert) {
+       var done = assert.async();
+
+       this.server.respondWith([
+           HTTP_STATUSES.OK,
+           HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+           JSON.stringify({
+               error: {
+                   code: "500",
+                   message: "Simulated error"
+               }
+           })
+       ]);
+
+       var log = [];
+       var store = createJayDataStore({
+           errorHandler: function (error) {
+               log.push(["optional", error.message]);
+           }
+       });
+
+       dataNs.errorHandler = function (error) {
+           log.push(["global", error.message]);
+       };
+
+       store.byKey(1)
+           .done(function () {
+               assert.ok(false, NO_PASARAN_MESSAGE);
+           })
+           .fail(function (error) {
+               log.push(["direct", error.message]);
+           })
+           .always(function () {
+               assert.deepEqual(log, [
+                   ["optional", "Simulated error"],
+                   ["global", "Simulated error"],
+                   ["direct", "Simulated error"]
+               ]);
+           })
+           .always(function () {
+               dataNs.errorHandler = null;
+           })
+           .always(done);
+   });
+
+   QUnit.test("error handling for update", function (assert) {
+       var done = assert.async();
+
+       this.server.respondWith([
+           HTTP_STATUSES.OK,
+           HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+           JSON.stringify({
+               error: {
+                   code: "500",
+                   message: "Simulated error"
+               }
+           })
+       ]);
+
+       var log = [];
+       var store = createJayDataStore({
+           autoCommit: true,
+           errorHandler: function (error) {
+               log.push(["optional", error.message]);
+           }
+       });
+
+       var entity = store.queryable()
+           .attachOrGet({ id: 1, name: "foo" });
+
+       dataNs.errorHandler = function (error) {
+           log.push(["global", error.message]);
+       };
+
+       store.update(1, { name: "bar" })
+           .done(function () {
+               assert.ok(false, NO_PASARAN_MESSAGE);
+           })
+           .fail(function (error) {
+               log.push(["direct", error.message]);
+           })
+           .always(function () {
+               assert.deepEqual(log, [
+                   ["optional", "Simulated error"],
+                   ["global", "Simulated error"],
+                   ["direct", "Simulated error"]
+               ]);
+           })
+           .always(function () {
+               dataNs.errorHandler = null;
+           })
+           .always(function () {
+               store.queryable().detach(entity);
+           })
+           .always(done);
+   });
+
+   QUnit.test("error handling for insert", function (assert) {
+       var done = assert.async();
+
+       this.server.respondWith([
+           HTTP_STATUSES.OK,
+           HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+           JSON.stringify({
+               error: {
+                   code: "500",
+                   message: "Simulated error"
+               }
+           })
+       ]);
+
+       var log = [];
+       var store = createJayDataStore({
+           autoCommit: true,
+           errorHandler: function (error) {
+               log.push(["optional", error.message]);
+           }
+       });
+
+       dataNs.errorHandler = function (error) {
+           log.push(["global", error.message]);
+       };
+
+       store.insert({ id: 1, name: "bar" })
+           .done(function () {
+               assert.ok(false, NO_PASARAN_MESSAGE);
+           })
+           .fail(function (error) {
+               log.push(["direct", error.message]);
+           })
+           .always(function () {
+               assert.deepEqual(log, [
+                   ["optional", "Simulated error"],
+                   ["global", "Simulated error"],
+                   ["direct", "Simulated error"]
+               ]);
+           })
+           .always(function () {
+               dataNs.errorHandler = null;
+           })
+           .always(done);
+   });
+
+   QUnit.test("error handling for remove", function (assert) {
+       var done = assert.async();
+
+       this.server.respondWith([
+           HTTP_STATUSES.OK,
+           HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+           JSON.stringify({
+               error: {
+                   code: "500",
+                   message: "Simulated error"
+               }
+           })
+       ]);
+
+       var log = [];
+       var store = createJayDataStore({
+           autoCommit: true,
+           errorHandler: function (error) {
+               log.push(["optional", error.message]);
+           }
+       });
+
+       var entity = store.queryable()
+           .attachOrGet({ id: 1, name: "foo" });
+
+       dataNs.errorHandler = function (error) {
+           log.push(["global", error.message]);
+       };
+
+       store.remove(1)
+           .done(function () {
+               assert.ok(false, NO_PASARAN_MESSAGE);
+           })
+           .fail(function (error) {
+               log.push(["direct", error.message]);
+           })
+           .always(function () {
+               assert.deepEqual(log, [
+                   ["optional", "Simulated error"],
+                   ["global", "Simulated error"],
+                   ["direct", "Simulated error"]
+               ]);
+           })
+           .always(function () {
+               dataNs.errorHandler = null;
+           })
+           .always(function () {
+               store.queryable().detach(entity);
+           })
+           .always(done);
    });
 
 })(QUnit, jQuery, DevExpress);
