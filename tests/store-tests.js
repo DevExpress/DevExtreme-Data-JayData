@@ -77,6 +77,12 @@
 
     QUnit.module("[Store-tests]", {
         beforeEach: function () {
+
+            ctx.Entities
+                .entityContext
+                .stateManager
+                .reset();
+
             this.server = sinon.fakeServer.create({
                 respondImmediately: true
             });
@@ -238,10 +244,6 @@
 
                 assert.equal(entity.entityState, $data.EntityState.Modified);
             })
-            .always(function () {
-                store.queryable()
-                    .detach(entity);
-            })
             .always(done);
     });
 
@@ -277,9 +279,59 @@
                 assert.equal(entity.name, "bar");
                 assert.equal(entity.entityState, $data.EntityState.Unchanged);
             })
-            .always(function () {
-                store.queryable()
-                    .detach(entity);
+            .always(done);
+    });
+
+    QUnit.test("insert", function (assert) {
+        var done = assert.async();
+
+        var store = createJayDataStore();
+
+        store.insert({ id: 1, name: "foo" })
+            .fail(function () {
+                assert.ok(false, NO_PASARAN_MESSAGE);
+            })
+            .done(function (values, key) {
+                assert.equal(key, 1);
+                assert.deepEqual(values, { id: 1, name: "foo" });
+
+                var entity = store.queryable()
+                    .attachOrGet({ id: 1 });
+
+                assert.equal(entity.id, 1);
+                assert.equal(entity.name, "foo");
+                assert.equal(entity.entityState, $data.EntityState.Added);
+            })
+            .always(done);
+    });
+
+    QUnit.test("insert (autCommit=true)", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith(function (request) {
+            request.respond(
+                HTTP_STATUSES.OK,
+                HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+                JSON.stringify({
+                    d: {
+                        id: 1,
+                        name: "foo"
+                    }
+                }));
+        });
+
+        var store = createJayDataStore({ autoCommit: true });
+
+        store.insert({ id: 1, name: "foo" })
+            .fail(function () {
+                assert.ok(false, NO_PASARAN_MESSAGE);
+            })
+            .done(function (values, key) {
+                assert.equal(key, 1);
+                assert.deepEqual(values, { id: 1, name: "foo" });
+
+                var tracked = store.entityContext().stateManager.trackedEntities;
+                assert.equal(tracked.length, 0);
             })
             .always(done);
     });
