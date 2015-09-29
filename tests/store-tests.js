@@ -305,7 +305,7 @@
             .always(done);
     });
 
-    QUnit.test("insert (autCommit=true)", function (assert) {
+    QUnit.test("insert (autoCommit=true)", function (assert) {
         var done = assert.async();
 
         this.server.respondWith(function (request) {
