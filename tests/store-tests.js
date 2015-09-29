@@ -219,4 +219,69 @@
         assert.deepEqual(store.keyOf({ id1: "abc", id2: "xyz" }), { id1: "abc", id2: "xyz" });
     });
 
+    QUnit.test("update", function (assert) {
+        var done = assert.async();
+
+        var store = createJayDataStore();
+        var entity = store.queryable()
+            .attachOrGet({ id: 1, name: "foo" });
+
+        assert.equal(entity.entityState, $data.EntityState.Unchanged);
+
+        store.update(1, { name: "bar" })
+            .fail(function () {
+                assert.ok(false, NO_PASARAN_MESSAGE);
+            })
+            .done(function (key, values) {
+                assert.equal(key, 1);
+                assert.deepEqual(values, { name: "bar" });
+
+                assert.equal(entity.entityState, $data.EntityState.Modified);
+            })
+            .always(function () {
+                store.queryable()
+                    .detach(entity);
+            })
+            .always(done);
+    });
+
+    QUnit.test("update (autoCommit=true)", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith(function (request) {
+            request.respond(
+                HTTP_STATUSES.OK,
+                HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+                JSON.stringify({
+                    d: {
+                        id: 1,
+                        name: "bar"
+                    }
+                }));
+        });
+
+        var store = createJayDataStore({ autoCommit: true });
+        var entity = store.queryable()
+            .attachOrGet({ id: 1, name: "foo" });
+
+        assert.equal(entity.entityState, $data.EntityState.Unchanged);
+
+        store.update(1, { name: "bar" })
+            .fail(function () {
+                assert.ok(false, NO_PASARAN_MESSAGE);
+            })
+            .done(function (key, values) {
+                assert.equal(key, 1);
+                assert.deepEqual(values, { name: "bar" });
+
+                assert.equal(entity.name, "bar");
+                assert.equal(entity.entityState, $data.EntityState.Unchanged);
+            })
+            .always(function () {
+                store.queryable()
+                    .detach(entity);
+            })
+            .always(done);
+    });
+
 })(QUnit, jQuery, DevExpress);
