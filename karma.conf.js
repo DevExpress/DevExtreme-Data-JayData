@@ -16,10 +16,10 @@ module.exports = function (config) {
             "lib/jaydata-itself/index.js",
             "lib/jaydata-odata-provider/index.js",
             "lib/sinon/index.js",
-            
+
             "src/dx.data.jayData.js",
 
-            "tests/queryJayDataTests.js"
+            "tests/query-tests.js"
         ],
         plugins: [
             "karma-qunit",
