@@ -11,7 +11,7 @@ module.exports = function (config) {
             "lib/globalize/globalize.js",
             "lib/devextreme/dx.all.js",
 
-            "lib/datajs/datajs-*.min.js",
+            "lib/datajs/datajs.min.js",
 
             "lib/jaydata-itself/index.js",
             "lib/jaydata-odata-provider/index.js",

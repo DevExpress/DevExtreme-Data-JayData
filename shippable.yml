@@ -14,4 +14,4 @@ before_script:
 - mkdir -p shippable/codecoverage
 
 script:
-- gulp run-all
+- gulp run

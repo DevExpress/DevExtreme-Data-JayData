@@ -65,6 +65,10 @@
     function createJayDataQuery(options) {
         return dataNs.queryImpl.jayData(ctx.Entities, options);
     }
+    
+    function getODataQueryParams(url) {
+        return url.split("?")[1].split("&").sort();
+    }
 
     QUnit.module("[Query-tests]", {
         beforeEach: function () {
@@ -275,9 +279,9 @@
 
         this.server.respondWith(function (request) {
 
-            assert.equal(
-                "Service/Entities?$top=2&$skip=1",
-                decodeURIComponent(request.url)
+            assert.deepEqual(
+                getODataQueryParams("Service/Entities?$skip=1&$top=2"),
+                getODataQueryParams(decodeURIComponent(request.url))
                 );
 
             request.respond(HTTP_STATUSES.OK, HTTP_WEBAPI_ODATA_RESPONSE_HEADERS, JSON.stringify({
@@ -514,9 +518,9 @@
 
         this.server.respondWith(function (request) {
 
-            assert.equal(
-                "Service/Entities?$orderby=id&$filter=((id eq 1) and (id eq 2))&$top=2&$skip=1",
-                decodeURIComponent(request.url)
+            assert.deepEqual(
+                getODataQueryParams("Service/Entities?$orderby=id&$filter=((id eq 1) and (id eq 2))&$skip=1&$top=2"),
+                getODataQueryParams(decodeURIComponent(request.url))
                 );
 
             request.respond(
