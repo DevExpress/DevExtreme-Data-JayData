@@ -1,21 +1,22 @@
 {
   "name": "devextreme-data-jaydata",
-  "version": "15.1.6",
+  "version": "15.2.9",
   "repository": {
     "type": "git",
     "url": "https://github.com/DevExpress/DevExtreme-Data-JayData.git"
   },
   "devDependencies": {
-    "bower": "^1.4.1",
+    "bower": "^1.7.9",
     "bower-installer": "^1.2.0",
-    "gulp": "^3.9.0",
-    "gulp-qunit": "^1.2.1",
-    "gulp-serve": "1.0.0",
+    "gulp": "^3.9.1",
+    "gulp-qunit": "^1.4.0",
+    "gulp-serve": "^1.0.0",
     "karma": "^0.13.22",
     "karma-coverage": "^0.5.5",
     "karma-junit-reporter": "^0.4.2",
     "karma-phantomjs-launcher": "^1.0.0",
     "karma-qunit": "^0.1.9",
-    "phantomjs-prebuilt": "^2.1.7"
+    "phantomjs-prebuilt": "^2.1.7",
+    "qunitjs": "^1.23.1"
   }
 }
