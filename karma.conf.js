@@ -8,7 +8,6 @@ module.exports = function (config) {
             "lib/qunit/qunit.css",
 
             "lib/jquery/jquery.js",
-            "lib/globalize/globalize.js",
             "lib/devextreme/dx.all.js",
 
             "lib/datajs/datajs.min.js",

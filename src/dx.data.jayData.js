@@ -1,12 +1,20 @@
-(function($, DX, undefined) {
-    var dataNs = DX.data,
-    
-        utilsNs = DX.require("/utils/utils.common"),
-        __isArray = utilsNs.isArray,
-        __isNumber = utilsNs.isNumber,
-        
-        __camelize = DX.require("/utils/utils.inflector").camelize;
-        
+(function(root, factory) {
+    if(typeof define === 'function' && define.amd) {
+        define(function(require, exports, module) {
+            module.exports = factory(
+                require("jquery"),
+                require("core"),
+                require("data"),
+                require("errors"),
+                require("utils"));
+        });
+    } else {
+        factory($, DevExpress, DevExpress.data, DevExpress.errors, DevExpress.utils);
+    }
+})(this, function($, DX, data, errors, utils) {
+    var commonUtils = utils.common,
+        inflector = utils.inflector;
+
     var jayDataQuery = function(queryable, queryOptions, tasks) {
         if(!("$data" in window))
             throw Error("JayData library is required");
@@ -20,7 +28,7 @@
             if (errorHandler)
                 errorHandler(error);
 
-            dataNs._errorHandler(error);
+            data._errorHandler(error);
         };
         
         var applyTasks = function(tasks) {
@@ -74,7 +82,7 @@
             /* jshint evil:true */
             var fields = [];
 
-            if (!__isArray(expr))
+            if (!commonUtils.isArray(expr))
                 expr = $.makeArray(arguments);
 
             $.each(expr, function() {
@@ -83,7 +91,7 @@
                 
                 key = value.indexOf(".") === -1
                     ? value
-                    : __camelize(value.replace(/\./g, "-"));
+                    : inflector.camelize(value.replace(/\./g, "-"));
 
                 fields.push([key, ":", "entity.", value].join(""));
             });
@@ -99,7 +107,7 @@
         };
         
         var filter = function(criteria) {
-            if (!__isArray(criteria))
+            if (!commonUtils.isArray(criteria))
                 criteria = $.makeArray(arguments);
                 
             return derivedQuery("filter", [compileCriteria(criteria)]);
@@ -145,7 +153,7 @@
             };
             
             var compileCore = function(criteria) {
-                if(__isArray(criteria[0]))
+                if(commonUtils.isArray(criteria[0]))
                     return compileGroup(criteria);
                      
                 return compileBinary(criteria);
@@ -157,7 +165,7 @@
                     nextGroupOperator;
 
                 $.each(criteria, function() {
-                    if (__isArray(this)) {
+                    if (commonUtils.isArray(this)) {
                         if (groupOperands.length > 1 && nextGroupOperator !== groupOperator)
                             throw Error("Mixing of and/or is not allowed inside a single group");
 
@@ -178,7 +186,7 @@
                     right,
                     operator;
                     
-                criteria = dataNs.utils.normalizeBinaryCriterion(criteria);
+                criteria = data.utils.normalizeBinaryCriterion(criteria);
 
                 left = "it.".concat(criteria[0]);
                 right = isFinite(criteria[2]) ? criteria[2] : "'" + criteria[2] + "'";
@@ -214,7 +222,7 @@
                     var extra = {};
 
                     if (queryOptions.requireTotalCount) {
-                        extra.totalCount = __isNumber(data.totalCount)
+                        extra.totalCount = commonUtils.isNumber(data.totalCount)
                             ? data.totalCount
                             : -1;
                     }
@@ -260,16 +268,16 @@
             select: select,
             expand: expand,
 
-            sum: DX.abstract,
-            min: DX.abstract,
-            max: DX.abstract,
-            avg: DX.abstract,
-            groupBy: DX.abstract,
-            aggregate: DX.abstract
+            sum: DX.Class.abstract,
+            min: DX.Class.abstract,
+            max: DX.Class.abstract,
+            avg: DX.Class.abstract,
+            groupBy: DX.Class.abstract,
+            aggregate: DX.Class.abstract
         };
     };
 
-    var JayDataStore = dataNs.Store.inherit({
+    var JayDataStore = data.Store.inherit({
         ctor: function(options) {
             if (!$data)
                 throw Error("JayData library is required");
@@ -293,7 +301,7 @@
 
         createQuery: function(loadOptions) {
             loadOptions = loadOptions || {};
-            var query = dataNs.queryImpl.jayData(
+            var query = data.queryImpl.jayData(
                 loadOptions.queryable || this.queryable(),
                 { errorHandler: this._errorHandler, requireTotalCount: loadOptions.requireTotalCount }
                 );
@@ -361,7 +369,7 @@
 
             if (entity) d.resolve(entity);
             else {
-                predicate = !__isArray(key)
+                predicate = !commonUtils.isArray(key)
                     ? ["it.", key, "==", keyValue].join("")
                     : $.map(key, function(keyItem) {
                         return ["it.", keyItem, "==", keyValue[keyItem] || keyValue].join("");
@@ -432,7 +440,6 @@
         }
     });
 
-    dataNs.JayDataStore = JayDataStore;
-    dataNs.queryImpl.jayData = jayDataQuery;
-    
-})(jQuery, DevExpress);
+    data.JayDataStore = JayDataStore;
+    data.queryImpl.jayData = jayDataQuery;
+});
