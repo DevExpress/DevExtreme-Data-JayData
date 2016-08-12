@@ -8,7 +8,7 @@ To create a JayDataStore instance, call its constructor and pass the required co
  - ```queryable``` - Required. Takes on the JayData entity that should be accessed via this JayDataStore instance.
  - ```autoCommit``` - Optional. Specifies whether the changes made to the data are immediately committed to the server. The default value is false.
 
-``` 
+```javascript
 $data.Entity.extend("MyEntity", {
     id: { type: "int", key: true, computed: true },
     name: { type: String }
@@ -42,7 +42,7 @@ Besides the standard Store methods, the JayDataStore contains several JayData sp
  - ```entityType()``` - returns the type of the entity associated with this JayDataStore instance.
  - ```entityContext()``` - returns the JayData context containing the entity associated with this JayDataStore instance.
 
-```
+```javascript
 var jdStore = new DevExpress.data.JayDataStore(dataBase.MyEntities);
 jdStore.insert({
 	id: 1,
