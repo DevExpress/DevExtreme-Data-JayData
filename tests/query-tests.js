@@ -30,8 +30,13 @@
             key: false,
             type: String
         },
-        referenceToAnotherEntity: {
+        referenceToAnotherEntityOne: {
             type: "AnotherEntity",
+            inverseProperty: "referenceToEntity",
+            required: true
+        },
+        referenceToAnotherEntityTwo: {
+            type: "YetAnotherEntity",
             inverseProperty: "referenceToEntity",
             required: true
         }
@@ -48,13 +53,29 @@
         },
         referenceToEntity: {
             type: "Entity",
-            inverseProperty: "referenceToAnotherEntity"
+            inverseProperty: "referenceToAnotherEntityOne"
+        }
+    });
+
+    $data.Entity.extend("YetAnotherEntity", {
+        id: {
+            key: true,
+            type: Number
+        },
+        name: {
+            key: false,
+            type: String
+        },
+        referenceToEntity: {
+            type: "Entity",
+            inverseProperty: "referenceToAnotherEntityTwo"
         }
     });
 
     $data.EntityContext.extend("Context", {
         Entities: { type: $data.EntitySet, elementType: "Entity" },
-        AnotherEntities: { type: $data.EntitySet, elementType: "AnotherEntity"}
+        AnotherEntities: { type: $data.EntitySet, elementType: "AnotherEntity"},
+        YetAnotherEntities: { type: $data.EntitySet, elementType: "YetAnotherEntity" }
     });
 
     var ctx = new Context({
@@ -178,7 +199,7 @@
 
         this.server.respondWith(function (request) {
             assert.equal(
-                "Service/Entities?$orderby=name desc,description,referenceToAnotherEntity/name",
+                "Service/Entities?$orderby=name desc,description,referenceToAnotherEntityOne/name",
                 decodeURIComponent(request.url)
                 );
 
@@ -190,7 +211,7 @@
         createJayDataQuery()
             .sortBy("name", true)
             .thenBy("description")
-            .thenBy("referenceToAnotherEntity.name")
+            .thenBy("referenceToAnotherEntityOne.name")
             .enumerate()
             .always(done);
 
@@ -232,9 +253,8 @@
         var done = assert.async();
 
         this.server.respondWith(function (request) {
-
             assert.equal(
-                "Service/Entities?$expand=referenceToAnotherEntity",
+                "Service/Entities?$expand=referenceToAnotherEntityOne,referenceToAnotherEntityTwo",
                 decodeURIComponent(request.url)
                 );
 
@@ -244,7 +264,7 @@
         });
 
         createJayDataQuery()
-            .expand("referenceToAnotherEntity")
+            .expand("referenceToAnotherEntityOne", "referenceToAnotherEntityTwo")
             .enumerate()
             .always(done);
     });
@@ -255,7 +275,7 @@
         this.server.respondWith(function (request) {
 
             assert.equal(
-                "Service/Entities?$expand=referenceToAnotherEntity,referenceToAnotherEntity&$select=name,referenceToAnotherEntity/id,referenceToAnotherEntity/name",
+                "Service/Entities?$expand=referenceToAnotherEntityOne,referenceToAnotherEntityOne&$select=name,referenceToAnotherEntityOne/id,referenceToAnotherEntityOne/name",
                 decodeURIComponent(request.url)
                 );
 
@@ -267,8 +287,8 @@
         createJayDataQuery()
             .select(
                 "name",
-                "referenceToAnotherEntity.id",
-                "referenceToAnotherEntity.name"
+                "referenceToAnotherEntityOne.id",
+                "referenceToAnotherEntityOne.name"
                 )
             .enumerate()
             .always(done);

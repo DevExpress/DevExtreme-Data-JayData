@@ -102,8 +102,12 @@
         var expand = function(expr) {
             if (!$.isArray(expr))
                 expr = $.makeArray(arguments);
-                
-            return derivedQuery("include", expr);
+
+            var newTasks = $.map(expr, function(path) {
+                return { action: "include", params: [path] };
+            });
+
+            return jayDataQuery(queryable, queryOptions, tasks.concat(newTasks));
         };
         
         var filter = function(criteria) {
