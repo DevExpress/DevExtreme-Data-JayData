@@ -343,11 +343,13 @@
             return key.length > 1 ? key : key[0];
         },
 
-        _byKeyImpl: function(keyValue) {
+        _byKeyImpl: function(keyValue, extraOptions) {
             var d,
                 key,
                 type,
-                predicate;
+                expand,
+                predicate,
+                queryable;
 
             var entity;
 
@@ -356,6 +358,7 @@
             d = $.Deferred();
             key = this.key();
             type = this.entityType();
+            expand = (extraOptions || {}).expand;
 
             $.each(this.entityContext().stateManager.trackedEntities,
                 $.proxy(function(_, item) {
@@ -368,8 +371,7 @@
 
                     entity = item.data;
                     return false;
-                }, this)
-                );
+                }, this));
 
             if (entity) d.resolve(entity);
             else {
@@ -378,8 +380,16 @@
                     : $.map(key, function(keyItem) {
                         return ["it.", keyItem, "==", keyValue[keyItem] || keyValue].join("");
                     }).join(" && ");
-                this.queryable()
-                    .filter(predicate)
+                
+                queryable = this.queryable();
+                if(expand) {
+                    expand = $.makeArray(expand);
+                    $.each(expand, function(_, selector) {
+                        queryable = queryable.include(selector);
+                    });
+                } 
+
+                queryable.filter(predicate)
                     .toArray()
                     .fail(d.reject)
                     .done(function(results) { d.resolve(results[0]); });
