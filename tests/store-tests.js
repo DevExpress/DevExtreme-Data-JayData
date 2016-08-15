@@ -31,8 +31,13 @@
             key: false,
             type: String
         },
-        referenceToAnotherEntity: {
+        referenceToAnotherEntityOne: {
             type: "AnotherEntity",
+            inverseProperty: "referenceToEntity",
+            required: true
+        },
+        referenceToAnotherEntityTwo: {
+            type: "YetAnotherEntity",
             inverseProperty: "referenceToEntity",
             required: true
         }
@@ -49,7 +54,22 @@
         },
         referenceToEntity: {
             type: "Entity",
-            inverseProperty: "referenceToAnotherEntity"
+            inverseProperty: "referenceToAnotherEntityOne"
+        }
+    });
+
+    $data.Entity.extend("YetAnotherEntity", {
+        id: {
+            key: true,
+            type: Number
+        },
+        name: {
+            key: false,
+            type: String
+        },
+        referenceToEntity: {
+            type: "Entity",
+            inverseProperty: "referenceToAnotherEntityTwo"
         }
     });
 
@@ -61,6 +81,7 @@
     $data.EntityContext.extend("Context", {
         Entities: { type: $data.EntitySet, elementType: "Entity" },
         AnotherEntities: { type: $data.EntitySet, elementType: "AnotherEntity" },
+        YetAnotherEntities: { type: $data.EntitySet, elementType: "YetAnotherEntity" },
         EntitiesWithCompoundKey: { type: $data.EntitySet, elementType: "EntityWithCompoundKey" }
     });
 
@@ -144,7 +165,7 @@
         var done = assert.async();
 
         this.server.respondWith(function (request) {
-            assert.equal(decodeURIComponent(request.url), "Service/Entities?$inlinecount=allpages&$expand=referenceToAnotherEntity&$filter=(name eq 'foo')&$orderby=name desc");
+            assert.equal(decodeURIComponent(request.url), "Service/Entities?$inlinecount=allpages&$expand=referenceToAnotherEntityOne&$filter=(name eq 'foo')&$orderby=name desc");
 
             request.respond(
                 HTTP_STATUSES.OK,
@@ -159,7 +180,7 @@
                     desc: true
                 },
                 filter: ["name", "foo"],
-                expand: ["referenceToAnotherEntity"],
+                expand: ["referenceToAnotherEntityOne"],
                 requireTotalCount: true
             })
             .always(done);
@@ -204,6 +225,50 @@
                 "id2": 2,
                 "it should be ignored": "it will be ignored"
             })
+            .always(done);
+    });
+
+    QUnit.test("byKey (with simple expand clause)", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith(function (request) {
+            assert.equal(
+                decodeURIComponent(request.url),
+                "Service/Entities?$expand=referenceToAnotherEntityOne&$filter=(id eq 1)"
+            );
+
+            request.respond(
+                HTTP_STATUSES.OK,
+                HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+                JSON.stringify({
+                    d: { value: {} }
+                }));
+        });
+
+        createJayDataStore({ key: "id" })
+            .byKey(1, { expand: "referenceToAnotherEntityOne" })
+            .always(done);
+    });
+
+    QUnit.test("byKey (with compound expand clauses)", function (assert) {
+        var done = assert.async();
+        
+        this.server.respondWith(function (request) {
+            assert.equal(
+                decodeURIComponent(request.url),
+                "Service/Entities?$expand=referenceToAnotherEntityOne,referenceToAnotherEntityTwo&$filter=(id eq 1)"
+            );
+
+            request.respond(
+                HTTP_STATUSES.OK,
+                HTTP_WEBAPI_ODATA_RESPONSE_HEADERS,
+                JSON.stringify({
+                    d: { value: {} }
+                }));
+        });
+
+        createJayDataStore({ key: "id" })
+            .byKey(1, { expand: ["referenceToAnotherEntityOne", "referenceToAnotherEntityTwo"] })
             .always(done);
     });
 
