@@ -403,6 +403,19 @@
             .always(done);
     });
 
+      QUnit.test("not operation", function (assert) {
+        var done = assert.async();
+
+        this.server.respondWith(function (request) {
+            assert.equal(decodeURIComponent(request.url), "Service/Entities?$filter=not((id ne 1))");
+        });
+
+        createJayDataQuery()
+            .filter(["!", ["id", "<>", 1]])
+            .enumerate()
+            .always(done);
+    });
+
     QUnit.test("filter:complex #2", function (assert) {
         var done = assert.async();
 

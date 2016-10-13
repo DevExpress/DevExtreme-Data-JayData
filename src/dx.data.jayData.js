@@ -155,12 +155,26 @@
 
                 return shouldNegate ? "!(" + result + ")" : result;                
             };
+
+            var isUnary = function(criteria) {
+                return criteria[0]==="!" && $.isArray(criteria[1]);
+            };
             
             var compileCore = function(criteria) {
-                if(commonUtils.isArray(criteria[0]))
+                if (commonUtils.isArray(criteria[0]))
                     return compileGroup(criteria);
+
+                if (isUnary(criteria))
+                    return compileUnary(criteria);
                      
                 return compileBinary(criteria);
+            };
+
+            var compileUnary = function(criteria) {
+                var op = criteria[0];
+
+                if (op === "!")
+                    return "!(" + compileCore(criteria[1]) + ")";
             };
             
             var compileGroup = function(criteria) {
@@ -198,7 +212,7 @@
 
                 return formatCriterion(operator, left, right);
             };
-        
+           
             return compileCore(criteria);
         };
         
